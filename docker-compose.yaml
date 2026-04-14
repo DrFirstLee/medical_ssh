@@ -1,14 +1,20 @@
 version: '3.8'
 
 services:
-  # [관리용] 윈도우 서버 SSH 접속용 Cloudflare Tunnel 전용 설정
   tunnel_ssh:
     image: cloudflare/cloudflared:latest
     container_name: swift_tunnel_server
     environment:
       - TUNNEL_TOKEN=${TUNNEL_TOKEN}
-    # host.docker.internal은 윈도우 호스트(SSH 서버)의 주소를 가리킵니다.
     command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    # [수정 1] 공유 네트워크에 참여시킵니다.
+    networks:
+      - shared_api_network
     restart: always
+
+# [수정 2] 외부에서 생성된 네트워크를 정의합니다.
+networks:
+  shared_api_network:
+    external: true
